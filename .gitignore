@@ -3,3 +3,7 @@ __pycache__/
 .DS_Store
 .venv/
 venv/
+
+state/seen.json
+new_items.json
+new_items_detail.json
