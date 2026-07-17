@@ -96,6 +96,21 @@ def fetch_outlet_items(source: dict) -> list[dict]:
     return items
 
 
+def fetch_all_new_items(outlets: list, state: dict) -> dict:
+    """Quét toàn bộ outlets, trả về {tên báo: [bài mới]}. Dedup theo tên báo
+    (state key = tên báo, không còn theo chủ đề — mỗi báo chỉ quét một lần
+    mỗi ngày, không lặp lại cho từng chủ đề như thiết kế cũ)."""
+    result = {}
+    for source in outlets:
+        name = source["name"]
+        print(f"Đang quét: {name}")
+        items = fetch_outlet_items(source)
+        new_items = filter_new_items(name, items, state)
+        result[name] = new_items
+        print(f"  -> {len(items)} bài trong feed, {len(new_items)} bài mới")
+    return result
+
+
 def process_topics(topics: list[dict], outlets: list[dict], state: dict) -> dict:
     """Với mỗi chủ đề: quét các báo khai báo (hoặc TẤT CẢ báo trong outlets:
     nếu topic không giới hạn danh sách), giữ lại bài khớp từ khóa VÀ chưa từng

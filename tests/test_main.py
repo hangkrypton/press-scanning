@@ -1,4 +1,5 @@
-from scripts.main import build_output
+import scripts.main as main_module
+from scripts.main import build_output, fetch_all_new_items
 
 
 def test_build_output_splits_index_and_detail_sharing_id():
@@ -65,3 +66,21 @@ def test_build_output_flattens_multiple_outlets_and_items():
     assert len(detail_items) == 3
     outlets_by_id = {item["id"]: item["outlet"] for item in index_items}
     assert outlets_by_id == {"a1": "VnExpress", "a2": "VnExpress", "b1": "Tuổi Trẻ"}
+
+
+def test_fetch_all_new_items_dedupes_per_outlet_not_per_topic(monkeypatch):
+    def fake_fetch_outlet_items(source):
+        return [
+            {"id": "a1", "title": "Bài A", "link": "https://x.vn/a1", "published": "", "summary_raw": "tóm tắt A"},
+            {"id": "a2", "title": "Bài B", "link": "https://x.vn/a2", "published": "", "summary_raw": "tóm tắt B"},
+        ]
+
+    monkeypatch.setattr(main_module, "fetch_outlet_items", fake_fetch_outlet_items)
+
+    outlets = [{"name": "Báo X", "feed_url": "https://x.vn/rss"}]
+    state = {"Báo X": ["a1"]}  # a1 đã thấy từ trước
+
+    result = fetch_all_new_items(outlets, state)
+
+    assert [item["id"] for item in result["Báo X"]] == ["a2"]
+    assert state["Báo X"] == ["a1", "a2"]
