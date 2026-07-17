@@ -18,7 +18,7 @@ press-scanning/
 ├── scripts/
 │   ├── discover_feed.py    <- tự dò URL feed RSS/Atom từ trang chủ
 │   ├── dedup_store.py      <- quản lý "đã đọc tới đâu"
-│   └── main.py             <- chạy toàn bộ, xuất new_items.json
+│   └── main.py             <- chạy toàn bộ, xuất new_items.json + new_items_detail.json
 ├── state/seen.json         <- trạng thái đã đọc (được ghi đè sau mỗi lần chạy)
 ├── new_items.json          <- bản nhẹ (id/outlet/title/snippet/link) để Claude cụm nhóm
 ├── new_items_detail.json   <- bản đầy đủ, đánh chỉ mục theo id, để Claude tra cứu chi tiết
