@@ -27,6 +27,33 @@ SOURCES_PATH = ROOT / "config" / "sources.yaml"
 OUTPUT_PATH = ROOT / "new_items.json"
 
 MAX_ITEMS_PER_SOURCE = 30  # feed thời sự cập nhật dày trong ngày, nên nới rộng
+SNIPPET_LENGTH = 150
+
+
+def build_output(new_items_by_outlet: dict) -> tuple:
+    """Biến đổi {outlet: [items]} thành 2 danh sách phẳng dùng chung field
+    "id" để tra cứu chéo: index (nhẹ, để cụm nhóm) và detail (đầy đủ, để viết
+    "Toàn cảnh" cho các chủ đề đã chọn)."""
+    index_items = []
+    detail_items = []
+    for outlet, items in new_items_by_outlet.items():
+        for item in items:
+            index_items.append({
+                "id": item["id"],
+                "outlet": outlet,
+                "title": item["title"],
+                "snippet": item["summary_raw"][:SNIPPET_LENGTH],
+                "link": item["link"],
+                "published": item["published"],
+            })
+            detail_items.append({
+                "id": item["id"],
+                "outlet": outlet,
+                "title": item["title"],
+                "summary": item["summary_raw"],
+                "link": item["link"],
+            })
+    return index_items, detail_items
 
 
 def load_config() -> dict:
