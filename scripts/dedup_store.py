@@ -7,7 +7,7 @@ toàn bộ trang mỗi lần.
 
 State lưu tại state/seen.json, có cấu trúc:
 {
-  "Nieman Lab": ["<id bài 1>", "<id bài 2>", ...],
+  "VnExpress": ["<id bài 1>", "<id bài 2>", ...],
   ...
 }
 
