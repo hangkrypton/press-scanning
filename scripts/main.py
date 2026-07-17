@@ -13,7 +13,6 @@ Output: new_items.json ở thư mục gốc repo.
 from __future__ import annotations  # tương thích Python 3.9.6 (xem CLAUDE.md)
 
 import json
-import unicodedata
 from pathlib import Path
 
 import feedparser
@@ -24,7 +23,8 @@ from scripts.discover_feed import discover_feed
 
 ROOT = Path(__file__).parent.parent
 SOURCES_PATH = ROOT / "config" / "sources.yaml"
-OUTPUT_PATH = ROOT / "new_items.json"
+INDEX_OUTPUT_PATH = ROOT / "new_items.json"
+DETAIL_OUTPUT_PATH = ROOT / "new_items_detail.json"
 
 MAX_ITEMS_PER_SOURCE = 30  # feed thời sự cập nhật dày trong ngày, nên nới rộng
 SNIPPET_LENGTH = 150
@@ -58,21 +58,7 @@ def build_output(new_items_by_outlet: dict) -> tuple:
 
 def load_config() -> dict:
     raw = yaml.safe_load(SOURCES_PATH.read_text(encoding="utf-8"))
-    return {
-        "outlets": raw.get("outlets", []),
-        "topics": raw.get("topics", []),
-    }
-
-
-def _normalize(text: str) -> str:
-    """Chuẩn hóa Unicode (NFC) + hạ chữ thường, để so khớp từ khóa tiếng Việt
-    ổn định bất kể trang nguồn encode dấu theo kiểu tổ hợp (NFD) hay sẵn (NFC)."""
-    return unicodedata.normalize("NFC", text or "").lower()
-
-
-def matches_keywords(item: dict, keywords: list[str]) -> bool:
-    haystack = _normalize(item.get("title", "") + " " + item.get("summary_raw", ""))
-    return any(_normalize(kw) in haystack for kw in keywords)
+    return {"outlets": raw.get("outlets", [])}
 
 
 def fetch_outlet_items(source: dict) -> list[dict]:
@@ -111,53 +97,18 @@ def fetch_all_new_items(outlets: list, state: dict) -> dict:
     return result
 
 
-def process_topics(topics: list[dict], outlets: list[dict], state: dict) -> dict:
-    """Với mỗi chủ đề: quét các báo khai báo (hoặc TẤT CẢ báo trong outlets:
-    nếu topic không giới hạn danh sách), giữ lại bài khớp từ khóa VÀ chưa từng
-    thấy — dùng khoá "topic::<id>::<tên báo>" trong state để mỗi chủ đề có
-    lịch sử dedupe riêng, kể cả khi hai chủ đề cùng quét một báo."""
-    outlets_by_name = {o["name"]: o for o in outlets}
-    result = {}
-
-    for topic in topics:
-        topic_id, name, keywords = topic["id"], topic["name"], topic["keywords"]
-        print(f"Đang xử lý chủ đề: {name} ({topic_id})")
-        topic_items = []
-
-        wanted_names = topic.get("outlets") or list(outlets_by_name.keys())
-        for src_name in wanted_names:
-            source = outlets_by_name.get(src_name)
-            if source is None:
-                print(f"  [!] '{src_name}' không có trong outlets: — kiểm tra lại chính tả trong topics.{topic_id}.outlets")
-                continue
-
-            items = fetch_outlet_items(source)
-            matched = [item for item in items if matches_keywords(item, keywords)]
-
-            state_key = f"topic::{topic_id}::{src_name}"
-            new_items = filter_new_items(state_key, matched, state)
-            for item in new_items:
-                item["source"] = src_name
-            topic_items.extend(new_items)
-            print(f"  -> {src_name}: {len(matched)} bài khớp từ khóa, {len(new_items)} bài mới")
-
-        result[topic_id] = {"name": name, "items": topic_items}
-
-    return result
-
-
 def main():
     config = load_config()
     state = load_state()
 
-    topics_result = process_topics(config["topics"], config["outlets"], state)
-    result = {"topics": topics_result}
+    new_items_by_outlet = fetch_all_new_items(config["outlets"], state)
+    index_items, detail_items = build_output(new_items_by_outlet)
 
     save_state(state)
-    OUTPUT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"\nĐã ghi kết quả vào {OUTPUT_PATH}")
-    total_topic_items = sum(len(t["items"]) for t in topics_result.values())
-    print(f"Tổng {total_topic_items} bài mới khớp các chủ đề đang theo dõi.")
+    INDEX_OUTPUT_PATH.write_text(json.dumps(index_items, ensure_ascii=False, indent=2), encoding="utf-8")
+    DETAIL_OUTPUT_PATH.write_text(json.dumps(detail_items, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    print(f"\nĐã ghi {len(index_items)} bài mới vào {INDEX_OUTPUT_PATH.name} và {DETAIL_OUTPUT_PATH.name}")
 
 
 if __name__ == "__main__":
