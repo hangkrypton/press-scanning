@@ -46,3 +46,22 @@ def test_build_output_truncates_snippet_to_150_chars():
 
 def test_build_output_empty_input_returns_empty_lists():
     assert build_output({}) == ([], [])
+
+
+def test_build_output_flattens_multiple_outlets_and_items():
+    new_items_by_outlet = {
+        "VnExpress": [
+            {"id": "a1", "title": "A1", "link": "https://a.vn/1", "published": "", "summary_raw": "tt a1"},
+            {"id": "a2", "title": "A2", "link": "https://a.vn/2", "published": "", "summary_raw": "tt a2"},
+        ],
+        "Tuổi Trẻ": [
+            {"id": "b1", "title": "B1", "link": "https://b.vn/1", "published": "", "summary_raw": "tt b1"},
+        ],
+    }
+
+    index_items, detail_items = build_output(new_items_by_outlet)
+
+    assert len(index_items) == 3
+    assert len(detail_items) == 3
+    outlets_by_id = {item["id"]: item["outlet"] for item in index_items}
+    assert outlets_by_id == {"a1": "VnExpress", "a2": "VnExpress", "b1": "Tuổi Trẻ"}
