@@ -1,13 +1,17 @@
 """
 scripts/main.py
 
-Orchestrator chính — theo dõi các chủ đề thời sự ("topics" trong sources.yaml)
-cùng lúc qua nhiều báo VN ("outlets"), lọc ra bài THẬT SỰ mới so với lần chạy
-trước, xuất kết quả thành new_items.json để Claude đọc và viết bản tổng hợp
-"Toàn cảnh: {tên chủ đề}".
+Orchestrator chính — quét RSS toàn bộ báo VN khai báo trong sources.yaml
+("outlets:"), lọc ra bài THẬT SỰ mới so với lần chạy trước (dedupe theo
+từng báo, không còn theo chủ đề như thiết kế cũ), rồi xuất 2 file để bước
+sau (Claude tự cụm nhóm sự kiện theo hiểu ngữ nghĩa, viết "Toàn cảnh: ...")
+đọc — file này không tự viết bản tổng hợp.
 
 Chạy: python -m scripts.main
-Output: new_items.json ở thư mục gốc repo.
+Output (thư mục gốc repo):
+- new_items.json: index nhẹ (title/snippet/link/published) để cụm nhóm.
+- new_items_detail.json: chi tiết đầy đủ, tra cứu chéo qua field "id" chung
+  với new_items.json, dùng khi viết "Toàn cảnh" cho các nhóm đã chọn.
 """
 
 from __future__ import annotations  # tương thích Python 3.9.6 (xem CLAUDE.md)
@@ -104,9 +108,9 @@ def main():
     new_items_by_outlet = fetch_all_new_items(config["outlets"], state)
     index_items, detail_items = build_output(new_items_by_outlet)
 
-    save_state(state)
     INDEX_OUTPUT_PATH.write_text(json.dumps(index_items, ensure_ascii=False, indent=2), encoding="utf-8")
     DETAIL_OUTPUT_PATH.write_text(json.dumps(detail_items, ensure_ascii=False, indent=2), encoding="utf-8")
+    save_state(state)
 
     print(f"\nĐã ghi {len(index_items)} bài mới vào {INDEX_OUTPUT_PATH.name} và {DETAIL_OUTPUT_PATH.name}")
 
