@@ -1,0 +1,84 @@
+# config/sources.yaml
+#
+# Theo dõi MỘT SỰ KIỆN/CHỦ ĐỀ thời sự cùng lúc qua NHIỀU báo điện tử Việt Nam,
+# để thấy "bức tranh chung" — báo nào khai thác góc nào của cùng một sự kiện.
+#
+# outlets: — danh mục báo VN dùng chung cho mọi chủ đề bên dưới (mỗi báo chỉ
+# khai báo feed_url một lần ở đây, không lặp lại trong từng topic). Thêm/bớt
+# báo — sửa trực tiếp danh sách này.
+#   name      : tên hiển thị
+#   feed_url  : URL feed RSS/Atom. Nếu không biết, chạy thử:
+#               `python -m scripts.discover_feed https://tenbao.vn` để tự dò.
+#
+# topics: — mỗi chủ đề có:
+#   id        : mã ngắn không dấu, dùng làm khoá lưu trạng thái đã đọc (không
+#               đổi sau khi đã chạy vài lần — đổi sẽ mất lịch sử dedupe của
+#               chủ đề đó, bot sẽ coi mọi bài cũ là "mới" lại lần đầu)
+#   name      : tên hiển thị đầy đủ (tiếng Việt có dấu, hiện trong bản tóm tắt)
+#   keywords  : danh sách từ khóa — một bài được coi là "khớp chủ đề" nếu tiêu
+#               đề hoặc tóm tắt chứa BẤT KỲ từ khóa nào (so khớp không phân
+#               biệt hoa/thường, không tự suy luận đồng nghĩa — nên viết vài
+#               biến thể cách báo hay dùng)
+#   outlets   : (tuỳ chọn) danh sách TÊN báo cần quét cho riêng chủ đề này —
+#               phải khớp đúng chính tả với tên trong outlets: ở trên. Không
+#               khai báo = mặc định quét TẤT CẢ báo trong outlets:. Với chủ đề
+#               chuyên biệt (vd. chỉ liên quan kinh tế), nên giới hạn lại để
+#               đỡ tốn thời gian quét những báo chắc chắn không đăng.
+#
+# Thêm chủ đề mới: copy khối mẫu `quy_tap_hai_cot` bên dưới, đổi id/name/
+# keywords, không cần đụng vào code.
+
+outlets:
+
+- name: VnExpress
+  feed_url: https://vnexpress.net/rss/tin-moi-nhat.rss
+- name: Tuổi Trẻ Online
+  feed_url: https://tuoitre.vn/rss/tin-moi-nhat.rss
+- name: Báo Thanh Niên
+  feed_url: https://thanhnien.vn/rss/home.rss
+- name: Báo Dân Trí
+  feed_url: https://dantri.com.vn/rss/tin-moi-nhat.rss
+- name: VietNamNet  # LỖI: RSS có vẻ đã ngừng hẳn, chưa tìm được feed thay thế — xem CLAUDE.md "Known gaps"
+  feed_url: https://vietnamnet.vn/rss/tin-moi-nhat.rss
+- name: CafeF
+  feed_url: https://cafef.vn/home.rss
+- name: BBC News Tiếng Việt
+  feed_url: https://feeds.bbci.co.uk/vietnamese/rss.xml
+- name: Báo Lao Động  # LỖI: chặn bot bằng JS cookie-challenge — xem CLAUDE.md "Known gaps"
+  feed_url: https://laodong.vn/rss/home.rss
+- name: Báo Tiền Phong
+  feed_url: https://tienphong.vn/rss/home.rss
+- name: Thời báo VTV (VTV Online)
+  feed_url: https://vtv.vn/rss/home.rss
+- name: Báo Điện tử VOV
+  feed_url: https://vov.vn/rss.xml
+- name: Báo Nhân Dân
+  feed_url: https://nhandan.vn/rss/home.rss
+- name: VietnamPlus (TTXVN)
+  feed_url: https://www.vietnamplus.vn/rss/home.rss
+- name: Báo Điện tử Chính phủ
+  feed_url: https://baochinhphu.vn/home.rss
+- name: Báo Công an Nhân dân
+  feed_url: https://cand.vn/rss/home.rss
+- name: Báo Sài Gòn Giải Phóng
+  feed_url: https://www.sggp.org.vn/rss/home.rss
+- name: Báo Xây dựng
+  feed_url: https://baoxaydung.vn/rss/home.rss
+- name: VnEconomy
+  feed_url: https://vneconomy.vn/tin-moi.rss
+- name: Báo Đầu Tư  # LỖI: feed tồn tại nhưng luôn rỗng, có vẻ đã bỏ bảo trì — xem CLAUDE.md "Known gaps"
+  feed_url: https://baodautu.vn/rss
+- name: Báo Quân đội Nhân dân  # LỖI: cần session cookie mới đọc được, ngoài khả năng hiện tại — xem CLAUDE.md "Known gaps"
+  feed_url: https://www.qdnd.vn/rss
+- name: Kênh 14
+  feed_url: https://kenh14.vn/rss/home.rss
+
+topics:
+
+- id: quy_tap_hai_cot
+  name: "Chiến dịch 500 ngày quy tập hài cốt liệt sĩ"
+  keywords:
+    - "quy tập hài cốt"
+    - "hài cốt liệt sĩ"
+    - "500 ngày đêm"
+    - "tìm kiếm, quy tập"
