@@ -60,7 +60,9 @@ press-scanning/
 
 1. Vào `code.claude.com/routines` (hoặc gõ `/schedule` trong Claude Code),
    chọn repo vừa tạo, chọn "Remote" (chạy trên cloud, không cần máy bạn mở).
-2. **Không cần bật connector Gmail** — bot này không dùng newsletter.
+2. **Không cần bật connector Gmail** — bot này không dùng newsletter. **Cần
+   bật connector Google Drive** — routine dùng nó để lưu bản tổng hợp mỗi
+   ngày.
 3. Đặt lịch: hằng ngày, giờ bạn muốn (sau giờ chạy của job local ít nhất
    15-30 phút, để job local kịp push code lên GitHub trước khi routine đọc).
 4. Dán prompt sau vào phần "Prompt" của routine:
@@ -77,7 +79,13 @@ press-scanning/
    câu thay vì liệt kê lặp lại từng báo. Nếu một chủ đề không có bài mới, bỏ
    qua chủ đề đó (không cần ghi "không có cập nhật"). Sau khi viết xong,
    commit file new_items.json và state/seen.json đã cập nhật vào repo, rồi
-   gửi bản tổng hợp qua kênh bạn chọn (email/OneDrive/...).
+   gửi bản tổng hợp qua kênh bạn chọn (email/OneDrive/...). Cuối cùng, lưu
+   bản tổng hợp vào Google Drive: dùng connector Google Drive, tìm thư mục
+   tên "Press Scanning" ở My Drive (tạo mới nếu chưa có), tạo một Google Doc
+   mới trong thư mục đó với tiêu đề "Toàn cảnh - {ngày hôm nay, định dạng
+   YYYY-MM-DD}" chứa toàn bộ nội dung bản tổng hợp vừa viết. Nếu một ngày
+   không có chủ đề nào có bài mới, bỏ qua bước lưu Drive (không tạo file
+   rỗng).
    ```
 
 5. Lưu routine.
