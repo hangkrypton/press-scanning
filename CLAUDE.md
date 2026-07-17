@@ -2,9 +2,9 @@
 
 Tự động phát hiện các chủ đề thời sự đang được nhiều báo điện tử Việt Nam cùng đưa tin trong ngày (`config/sources.yaml`: `outlets:`), để thấy "bức tranh chung" — cùng một sự kiện, báo nào khai thác góc nào. Repo: https://github.com/hangkrypton/press-scanning.
 
-This is a **separate project** from `media-briefing-bot` (a different repo/bot on this same machine — daily AI/journalism-industry newsletter digest, no topic tracking) — do not reuse its repo name, LaunchAgent label, or log file names for anything in this project.
+This is a **separate project** from `media-briefing-bot` (a different repo/bot on this same machine — daily AI/journalism-industry newsletter digest, no topic tracking) — do not reuse its repo name or log file names for anything in this project.
 
-Không có nguồn Gmail/newsletter nào trong dự án này — toàn bộ dữ liệu đến từ RSS feed của 21 báo trong `outlets:`. Cloud routine vì vậy không cần bật connector Gmail.
+Không có nguồn Gmail/newsletter nào trong dự án này — toàn bộ dữ liệu đến từ RSS feed của 21 báo trong `outlets:`. Scheduled task vì vậy không cần bật connector Gmail.
 
 ## Architecture: một scheduled task local duy nhất
 
@@ -37,7 +37,7 @@ buộc phải public**.
 ## Local environment gotchas
 
 - System Python is 3.9.6 (`/usr/bin/python3`) — **no `X | None` union type syntax**; add `from __future__ import annotations` at the top of any new module using it (already done throughout `scripts/`).
-- `git` on this machine uses `credential.helper=osxkeychain` with a cached PAT — non-interactive `git push` from launchd works as-is. If pushes start failing with an auth prompt, the PAT likely expired (fine-grained tokens were created with a short expiry) and needs regenerating at github.com/settings/tokens.
+- `git` on this machine uses `credential.helper=osxkeychain` with a cached PAT, so manual `git push` works without an auth prompt. If a push starts failing with an auth prompt, the PAT likely expired (fine-grained tokens were created with a short expiry) and needs regenerating at github.com/settings/tokens.
 - Test the pipeline manually before trusting the schedule: `python -m scripts.main`, then check `new_items.json`/`new_items_detail.json` have matching `id`s.
 
 ## Tự động phát hiện chủ đề nổi bật (multi-outlet coverage of one event)
