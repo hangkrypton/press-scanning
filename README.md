@@ -14,7 +14,7 @@ khác trên máy này (`media-briefing-bot`) — hai bot tách biệt hoàn toà
 
 ```
 press-scanning/
-├── config/sources.yaml     <- outlets: (danh mục báo VN) + topics: (chủ đề theo dõi)
+├── config/sources.yaml     <- outlets: (danh mục báo điện tử VN dùng chung)
 ├── scripts/
 │   ├── discover_feed.py    <- tự dò URL feed RSS/Atom từ trang chủ
 │   ├── dedup_store.py      <- quản lý "đã đọc tới đâu"
@@ -59,11 +59,10 @@ press-scanning/
 
 ## Thêm/bớt báo sau này
 
-Chỉ cần sửa `config/sources.yaml` (thêm/bớt một khối trong `outlets:` hoặc
-`topics:` theo đúng định dạng có sẵn) và commit — không cần đụng vào code.
-Bạn có thể nhờ Claude làm việc này giúp bằng cách nói "thêm báo X vào danh
-sách" hoặc "theo dõi thêm chủ đề Y" trong bất kỳ phiên chat nào có quyền truy
-cập repo.
+Chỉ cần sửa `config/sources.yaml` (thêm/bớt một khối trong `outlets:` theo
+đúng định dạng có sẵn) và commit — không cần đụng vào code. Bạn có thể nhờ
+Claude làm việc này giúp bằng cách nói "thêm báo X vào danh sách" trong bất kỳ
+phiên chat nào có quyền truy cập repo.
 
 ## Giới hạn cần biết
 
