@@ -4,6 +4,8 @@ __pycache__/
 .venv/
 venv/
 
+# seen.json là state dedup cục bộ — không cần commit (cloud routine không đọc)
 state/seen.json
-new_items.json
-new_items_detail.json
+
+# new_items.json + new_items_detail.json ĐƯỢC commit để routine cloud đọc từ GitHub
+# (cloud sandbox chỉ vào được github.com, không tự quét RSS được) — xem CLAUDE.md

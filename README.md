@@ -2,8 +2,11 @@
 
 Bot tự động phát hiện các chủ đề thời sự đang được nhiều báo điện tử Việt Nam
 cùng đưa tin trong ngày, để thấy "bức tranh chung": cùng một sự kiện, báo nào
-khai thác góc nào — không phải tự đọc từng trang. Chạy tự động qua **một
-Claude Code scheduled task local duy nhất**.
+khai thác góc nào — không phải tự đọc từng trang. Chạy tự động theo mô hình
+**local (launchd) + routine cloud** — giống `media-briefing-bot`: một job
+launchd quét RSS rồi push lên GitHub lúc 06:00, một routine cloud đọc dữ liệu
+đó lúc 06:30 để viết bản "Toàn cảnh" và lưu Google Drive. Xem CLAUDE.md để biết
+vì sao (mô hình cũ "một scheduled task trong app" hay lỡ khi máy ngủ).
 
 Bot này **không có nguồn Gmail/newsletter nào** — toàn bộ dữ liệu đến từ RSS
 feed của các báo VN trong `config/sources.yaml`. Nếu bạn muốn bản tin tổng hợp
@@ -18,10 +21,11 @@ press-scanning/
 ├── scripts/
 │   ├── discover_feed.py    <- tự dò URL feed RSS/Atom từ trang chủ
 │   ├── dedup_store.py      <- quản lý "đã đọc tới đâu"
-│   └── main.py             <- chạy toàn bộ, xuất new_items.json + new_items_detail.json
-├── state/seen.json         <- trạng thái đã đọc (được ghi đè sau mỗi lần chạy)
-├── new_items.json          <- bản nhẹ (id/outlet/title/snippet/link) để Claude cụm nhóm
-├── new_items_detail.json   <- bản đầy đủ, đánh chỉ mục theo id, để Claude tra cứu chi tiết
+│   ├── main.py             <- chạy toàn bộ, xuất new_items.json + new_items_detail.json
+│   └── run_daily.sh        <- launchd gọi mỗi 06:00: chạy main.py rồi commit + push
+├── state/seen.json         <- trạng thái đã đọc (cục bộ, KHÔNG commit)
+├── new_items.json          <- bản nhẹ (id/outlet/title/snippet/link); ĐƯỢC commit cho cloud đọc
+├── new_items_detail.json   <- bản đầy đủ, đánh chỉ mục theo id; ĐƯỢC commit cho cloud đọc
 └── requirements.txt
 ```
 
@@ -36,14 +40,13 @@ press-scanning/
    tìm `feed_url` và điền thẳng vào `sources.yaml`. 4 báo hiện đã biết là lỗi
    không sửa được bằng cách đổi URL — xem CLAUDE.md, mục "Known gaps".
 2. Chạy `python -m pytest` để xác nhận bộ test đi kèm vẫn pass.
-3. Task định kỳ "press-scanning" (Claude Code scheduled task, cấu hình tại
-   `~/.claude/scheduled-tasks/press-scanning/SKILL.md`) chạy toàn bộ pipeline
-   mỗi ngày: fetch RSS → cụm nhóm chủ đề (≥3 báo) → viết "Toàn cảnh" → lưu
-   Google Doc. **Cần bật connector Google Drive** trên task này — không cần
-   Gmail.
-4. Chạy thử task thủ công một lần trước khi tin vào lịch tự động, để kiểm tra
-   bước cụm nhóm có hợp lý và Google Doc lưu đúng thư mục "Press Scanning"
-   trên Drive.
+3. **Phần local** chạy qua launchd (`com.hangkrypton.press-scanning`, 06:00):
+   `scripts/run_daily.sh` chạy `main.py` rồi commit + push `new_items.json` +
+   `new_items_detail.json` lên GitHub. Chạy thử thủ công: `./scripts/run_daily.sh`.
+4. **Phần cloud** là routine "Press Scanning - Toàn cảnh" (claude.ai/code/routines,
+   06:30): đọc dữ liệu từ GitHub → cụm nhóm chủ đề (≥3 báo) → viết "Toàn cảnh"
+   → lưu Google Doc + hiển thị trong Claude App. **Cần bật connector Google
+   Drive trên routine** — không cần Gmail. Sửa prompt tại claude.ai/code/routines.
 
 ## Tự động phát hiện chủ đề nổi bật (bức tranh chung nhiều báo)
 
