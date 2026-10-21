@@ -17,6 +17,7 @@ Output (thư mục gốc repo):
 from __future__ import annotations  # tương thích Python 3.9.6 (xem CLAUDE.md)
 
 import json
+import socket
 from pathlib import Path
 
 import feedparser
@@ -32,6 +33,11 @@ DETAIL_OUTPUT_PATH = ROOT / "new_items_detail.json"
 
 MAX_ITEMS_PER_SOURCE = 30  # feed thời sự cập nhật dày trong ngày, nên nới rộng
 SNIPPET_LENGTH = 150
+# feedparser không nhận tham số timeout, nên đặt mặc định cho mọi socket —
+# không có dòng này, một báo không phản hồi (vd. QĐND 20/10/2026) làm cả lượt
+# quét treo vô hạn và chặn luôn các lượt launchd sau.
+FETCH_TIMEOUT_SECONDS = 30
+socket.setdefaulttimeout(FETCH_TIMEOUT_SECONDS)
 
 
 def build_output(new_items_by_outlet: dict) -> tuple:
@@ -73,7 +79,11 @@ def fetch_outlet_items(source: dict) -> list[dict]:
             print(f"  [!] Không tìm được feed cho '{source['name']}' — bỏ qua, cần kiểm tra thủ công.")
             return []
 
-    parsed = feedparser.parse(feed_url)
+    try:
+        parsed = feedparser.parse(feed_url)
+    except Exception as e:  # timeout / connection reset: bỏ qua báo này, không làm hỏng cả lượt quét
+        print(f"  [!] Lỗi tải feed '{source['name']}': {e!r} — bỏ qua.")
+        return []
     items = []
     for entry in parsed.entries[:MAX_ITEMS_PER_SOURCE]:
         items.append({
